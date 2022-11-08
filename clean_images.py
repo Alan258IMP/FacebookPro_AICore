@@ -3,7 +3,15 @@ import os
 
 def resize_image(final_size, im):
     '''
+    Resize a given image.
     This function is adapted from https://aicore-files.s3.amazonaws.com/MLOps/clean_images.py
+
+    Parameters
+    ----------
+    final_size
+        The size of the image after resizing.
+    im
+        The image to be resized.
     '''
     size = im.size
     ratio = float(final_size) / max(size)
