@@ -1,3 +1,6 @@
+# Alan (Wentao Li), Imperial College London
+# AICore 2022, All rights reserved
+
 from PIL import Image
 import os
 
