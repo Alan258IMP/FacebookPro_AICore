@@ -7,7 +7,7 @@ We downloaded the text and image dataset in .csv and .jpg format respectively.
 
 ## Milestone 4: Create a vision model
 
-pass
+In progress...
 
 ## Notes
 
