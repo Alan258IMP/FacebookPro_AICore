@@ -11,4 +11,4 @@ pass
 
 ## Notes
 
-1. If applicable, I recommend installing CUDA to get your GPU working on the training of the vision model and speed the process up.
+1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
