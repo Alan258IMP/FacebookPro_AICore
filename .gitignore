@@ -1,4 +1,6 @@
 *.__pycache__
 *.ipynb
+.vscode
 raw_data/images
+raw_data/cleaned_images
 practicals

@@ -3,7 +3,17 @@
 
 import pandas as pd
 
-rawtext_images = pd.read_csv('raw_data/Images.csv', lineterminator="\n")
-rawtext_products = pd.read_csv('raw_data/Products.csv', lineterminator="\n")
+def clean(table: pd.DataFrame):
+    '''
+    Clean the data in products.csv.
+    Specifically, by converting prices into np.float64
+    '''
+    table['price'] = table['price'].str.replace('£','')
+    table['price'] = table['price'].str.replace(',','')
+    table['price'] = table['price'].astype('float64')
+    return table
 
-print(rawtext_images, rawtext_products)
+if __name__ == '__main__':
+    products_table = pd.read_csv('raw_data/Products.csv', lineterminator="\n")
+    products_table_cleaned = clean(products_table)
+    products_table_cleaned.to_csv('raw_data/Products_cleaned.csv')
