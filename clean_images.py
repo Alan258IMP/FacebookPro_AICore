@@ -39,7 +39,7 @@ def make_save_directory(dir: str):
             shutil.rmtree(dir)
             os.mkdir(dir)
         else:
-            raise Exception('The target directory already exists.')
+            raise Exception('The target directory already exists - please check the directory manually before proceeding.')
     else:
         os.mkdir(dir)
 
@@ -55,6 +55,6 @@ if __name__ == '__main__':
         try:
             im = Image.open('raw_data/images/' + item)
             new_im = resize_image(final_size, im)
-            new_im.save(save_dir + f'/{n}_resized.jpg')
+            new_im.save(save_dir + f'/{item}') # Names will be unchanged
         except UnidentifiedImageError:
-            print(f'Warning: {item} is not in a format recognized by PIL. Is this an image?')
+            print(f'Warning: {item} is not in a recognized format by PIL. Is this an image?')

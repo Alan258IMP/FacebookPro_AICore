@@ -14,6 +14,6 @@ def clean(table: pd.DataFrame):
     return table
 
 if __name__ == '__main__':
-    products_table = pd.read_csv('raw_data/Products.csv', lineterminator="\n")
-    products_table_cleaned = clean(products_table)
-    products_table_cleaned.to_csv('raw_data/Products_cleaned.csv')
+    product_table = pd.read_csv('raw_data/Products.csv', lineterminator = "\n")
+    product_table_cleaned = clean(product_table)
+    product_table_cleaned.to_csv('raw_data/Products_cleaned.csv', columns = ['id', 'product_name', 'category', 'product_description', 'price', 'location'])

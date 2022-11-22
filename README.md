@@ -1,13 +1,13 @@
 # FacebookPro_AICore
 A python recreation of the system behind Facebook marketplace, which uses AI to recommend the most relevant listings based on a personalised search query.
 
-This project requires [Pandas](https://github.com/pandas-dev/pandas), [PIL](https://github.com/python-pillow/Pillow), [Sklearn](https://github.com/scikit-learn/scikit-learn) and [Pytorch](https://github.com/pytorch/pytorch.github.io).
+This project requires [Pandas](https://github.com/pandas-dev/pandas), [Pillow](https://github.com/python-pillow/Pillow), [Sklearn](https://github.com/scikit-learn/scikit-learn) and [Pytorch](https://github.com/pytorch/pytorch.github.io).
 
 ## Milestone 1 ~ 3: Preliminary processing of the dataset
 
 I downloaded the text and image dataset in .csv and .jpg format respectively. Then I performed some preliminary cleaning of the dataset.
 
-To clean the tabular dataset I converted the prices of the products to np.float64 objects by removing the pound signs and the commas. To clean the image dataset, I made use of the PIL library to resize all images to 256x256 size and RGB mode.
+To clean the tabular dataset I converted the prices of the products to np.float64 objects by removing the pound signs and the commas. To clean the image dataset, I made use of the Pillow library to resize all images to 256x256 size and standardized them to RGB mode.
 
 ## Milestone 4: Create a vision model
 
