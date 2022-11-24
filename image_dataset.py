@@ -3,20 +3,39 @@
 
 from PIL import Image, ImageFile
 import torch
-from torchvision import transforms
+import torchvision.transforms as T
 from torchvision.io import read_image
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 
 
 class Image_Dataset(torch.utils.data.Dataset):
+    '''
+    The Image_Dataset class inherits from the torch.utils.data.Dataset class.
+    It loads all image in a given directory and assign labels to them according to their categories, then does custom
+    transformation on the images. Finally it converts the images into torch tensors ready for training our models.
+
+    Args:
+    ----------
+    URL: str
+    The URL of the website to be scraped.
+    driver: webdriver
+    The browser used to load the webpage.
+    data_dir: str
+    The relative path of the directory in which the data will be stored.
+    headless: bool
+    When True, the script will run headlessly (to save GPU & CPU when scraping)
+    '''
     def __init__(self,
                  product_file = 'raw_data/Products_cleaned.csv',
                  image_file = 'raw_data/Images.csv',
                  image_dir = 'raw_data/cleaned_images',
-                 transform = None):
+                 transform = None,
+                 use_cuda = False):
         super().__init__()
         self.image_dir = image_dir
+        self.cuda = use_cuda
         # Read data
         self.product_table = pd.read_csv(product_file, lineterminator = "\n")
         self.product_table['category'] = self.product_table['category'].str.split("/").str[0].str[:-1]  # Ignore sub-categories - intended?
@@ -33,28 +52,30 @@ class Image_Dataset(torch.utils.data.Dataset):
 
         # Augmentation of images
         if transform is None:
-            self.transform = transforms.Compose([
-                transforms.RandomPerspective(distortion_scale=0.3, p=0.7),
-                transforms.RandomHorizontalFlip(p=0.5),
-                transforms.PILToTensor() #if use ToTensor, dtype = float
+            self.transform = T.Compose([
+                T.RandomPerspective(distortion_scale=0.2, p=0.4),
+                T.RandomHorizontalFlip(p=0.7),
+                T.PILToTensor() #if use ToTensor, dtype = float
             ])
 
     def __len__(self):
         return len(self.image_table)
     
-    def __getitem__(self, index: int):
+    def __getitem__(self, idx):
         '''
-        Returns the image as a torch tensor and its category in the form
+        Returns the image as a torch tensor and its category (encoded to an integer).
         '''
-        # print(index)
-        image_path = os.path.join(self.image_dir, f"{self.image_table.iloc[index, 0]}.jpg")
+        # print(idx)
+        image_path = os.path.join(self.image_dir, f"{self.image_table.iloc[idx, 0]}.jpg")
         image = Image.open(image_path)
         image = self.transform(image)
-        # convert_tensor = transforms.PILToTensor()
+        # convert_tensor = T.PILToTensor()
         # image = convert_tensor(image)
 
-        label = self.image_table['category'][index] # Category this image is in
+        label = self.image_table['category'][idx] # Category this image is in
         label = self.encoder[label] # Encode to int
+        if self.cuda:
+            image = image.cuda() # Get our GPU working on training the model
         return image, label
 
     def match_images(self, save = False):
@@ -68,14 +89,19 @@ class Image_Dataset(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-    dataset = Image_Dataset()
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size = 10, shuffle = True)
-    
-    # For debugging purpose only: print 3 pictures in a batch
+    dataset = Image_Dataset(use_cuda = True)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size = 16, shuffle = True)
+
+    # For debugging purpose only: Print a sample image
     images, labels = next(iter(dataloader))
-    for i in range(3):
-        print(images[i])
-        print(labels[i])
-        print(images[i].size())
+    index = 1
+    print(images[index])
+    print(labels[index])
+    print(images[index].is_cuda)
+    print(images[index].size())
+    # Show it with matplotlib
+    plt.imshow(images[index].cpu().permute(1,2,0)) # copied from stackoverflow, I don't understand how permute worked
+    plt.title("Sample Image")
+    plt.show()
 
     
