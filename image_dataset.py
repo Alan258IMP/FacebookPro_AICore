@@ -63,17 +63,16 @@ class Image_Dataset(torch.utils.data.Dataset):
     
     def __getitem__(self, idx):
         '''
-        Returns the image as a torch tensor and its category (encoded to an integer).
+        Returns the image as a torch.Tensor object, and its category (encoded to an integer).
         '''
         # print(idx)
         image_path = os.path.join(self.image_dir, f"{self.image_table.iloc[idx, 0]}.jpg")
         image = Image.open(image_path)
         image = self.transform(image)
-        # convert_tensor = T.PILToTensor()
-        # image = convert_tensor(image)
 
         label = self.image_table['category'][idx] # Category this image is in
         label = self.encoder[label] # Encode to int
+
         if self.cuda:
             image = image.cuda() # Get our GPU working on training the model
         return image, label
@@ -89,7 +88,7 @@ class Image_Dataset(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-    dataset = Image_Dataset(use_cuda = True)
+    dataset = Image_Dataset(use_cuda = False)
     dataloader = torch.utils.data.DataLoader(dataset, batch_size = 16, shuffle = True)
 
     # For debugging purpose only: Print a sample image
@@ -100,7 +99,7 @@ if __name__ == '__main__':
     print(images[index].is_cuda)
     print(images[index].size())
     # Show it with matplotlib
-    plt.imshow(images[index].cpu().permute(1,2,0)) # copied from stackoverflow, I don't understand how permute worked
+    plt.imshow(images[index].cpu().permute(1,2,0))
     plt.title("Sample Image")
     plt.show()
 

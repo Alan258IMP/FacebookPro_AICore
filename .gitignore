@@ -1,6 +1,8 @@
-*.__pycache__
+__pycache__
 *.ipynb
 .vscode
+model_evaluation
 raw_data/images
 raw_data/cleaned_images
 practicals
+runs
