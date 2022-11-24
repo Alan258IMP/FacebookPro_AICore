@@ -42,7 +42,8 @@ class Image_Dataset(torch.utils.data.Dataset):
         product_labels = self.product_table['category'].tolist() # labels for each product
         
         # Encoder & Decoder
-        # self.category_count = len(set(self.product_labels))
+        # self.category_count = len(set(product_labels)) # 13 in total
+        # print("No of categories:", self.category_count)
         self.encoder = {category_name: label_number for (label_number, category_name) in enumerate(set(product_labels))}
         self.decoder = {label_number: category_name for (label_number, category_name) in enumerate(set(product_labels))}
 
@@ -55,7 +56,9 @@ class Image_Dataset(torch.utils.data.Dataset):
             self.transform = T.Compose([
                 T.RandomPerspective(distortion_scale=0.2, p=0.4),
                 T.RandomHorizontalFlip(p=0.7),
-                T.PILToTensor() #if use ToTensor, dtype = float
+                T.ToTensor(), #if use ToTensor, dtype = float
+                # T.Normalize(mean=[0.485, 0.456, 0.406],
+                                #  std=[0.229, 0.224, 0.225]) # Necessary?
             ])
 
     def __len__(self):

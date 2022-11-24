@@ -138,14 +138,6 @@ if __name__ == '__main__':
     batch_size = 16
     epoch = 1
 
-    # DEBUG: delete later
-    # THIS DOES NOT WORK EITHER
-    # dataloader = torch.utils.data.DataLoader(dataset, batch_size = 16, shuffle = True)
-    # images, labels = next(iter(dataloader))
-    # print(images, labels)
-    # prediction = model(images)
-    # print(prediction)
-
     # Load datasets
     train_set, validation_set, test_set = split_train_test(dataset, fractions = [0.7, 0.15])
     # print(type(train_set)) # 'torch.utils.data.dataset.Subset'
