@@ -1,39 +1,16 @@
 # Alan (Wentao Li), Imperial College London
 # AICore 2022, All rights reserved
 
-from CNNmodel import CNN
+from models import CNN, Transfer_Resnet50
 from image_dataset import Image_Dataset
-import numpy as np
 import torch
 from torch.utils.tensorboard import SummaryWriter
 import torch.nn.functional as F
 import os
 import datetime
 
-def evaluate(model, dataloader):
-    '''
-    Evaluate the prediction of a model with a validation set.
-    Returns average loss and the accuracy of predictions.
-
-    Parameters
-    ----------
-    model: torch.nn.Module
-        The model to be evaluated.
-    dataloader: torch.utils.data.dataloader.DataLoader
-        The dataloader containing the data of the validation set.
-    '''
-
-    losses = []
-    correct = 0
-    example_count = 0
-    for (features, labels) in dataloader:
-        prediction = model(features)
-        loss = F.cross_entropy(prediction, labels)
-        losses.append(loss.detach()) # detach tensor from graph
-        predicted_category = torch.argmax(prediction, dim = 1)
-        correct += int(torch.sum(predicted_category == labels))
-        example_count += len(labels)
-    return np.mean(losses), correct/example_count
+# GPU is at least 20 times faster than CPU on my device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def split_train_test(dataset, fractions):
     '''
@@ -61,11 +38,39 @@ def split_train_test(dataset, fractions):
     
     return [train_set, validation_set, test_set]
 
-def train(model, train_loader, validation_loader, test_loader, model_name = None, optimizer = torch.optim.SGD, lr = 0.1, epochs = 10):
+def evaluate(model, dataloader):
     '''
-    Train and evaluate a model for a certain number of epoch, and save the model 
-    It trains the model, evaluates it on the validation dataset after each epoch, and saves the model
-    for each epoch
+    Evaluate the prediction of a model with a validation set.
+    Returns average loss and the accuracy of predictions.
+
+    Parameters
+    ----------
+    model: torch.nn.Module
+        The model to be evaluated.
+    dataloader: torch.utils.data.dataloader.DataLoader
+        The dataloader containing the data of the validation set.
+    '''
+
+    losses = []
+    correct = 0
+    example_count = 0
+    for (features, labels) in dataloader:
+        # Move to GPU
+        features = features.to(device)
+        labels = labels.to(device)
+
+        prediction = model(features)
+        loss = F.cross_entropy(prediction, labels)
+        losses.append(loss.detach()) # detach tensor from graph
+        predicted_category = torch.argmax(prediction, dim = 1)
+        correct += int(torch.sum(predicted_category == labels))
+        example_count += len(labels)
+    #return np.mean(losses), correct/example_count
+    return float(sum(losses))/len(losses), correct/example_count # numpy does not work with cuda type tensor
+
+def train(model, train_loader, validation_loader, test_loader, model_name = None, optimizer = torch.optim.SGD, lr = 0.01, epochs = 10):
+    '''
+    Train and evaluate a model for a certain number of epoch, and save the model for each epoch
     
     Parameters
     ----------
@@ -84,8 +89,7 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
     
     Returns
     -------
-        The model with the trained parameters
-    
+        The refined model after training
     '''
 
     writer = SummaryWriter()
@@ -101,9 +105,9 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
 
     for epoch in range(epochs):
         for (features, labels) in train_loader: # Load the batch
-
-            #print(features[0]) # This is the picture in torch.Tensor
-            #print(labels) # These are certainly the correct labels
+            # Move to GPU
+            features = features.to(device)
+            labels = labels.to(device)
 
             # Train the model with train_dataset
             prediction = model(features) # gives predicted labels. TODO: DEBUG
@@ -116,11 +120,12 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
             
             writer.add_scalar("Loss-Train", loss.item(), batch_idx)
             batch_idx += 1
-        
-        # Evaluate the model on the validation dataset
-        val_loss, val_accuracy = evaluate(model, validation_loader)
-        writer.add_scalar("Loss-Val", val_loss, val_accuracy)
 
+            if batch_idx % 150 == 0: # Draw a loss datapoint on tensorboard every 150 batches
+                # Evaluate the model on the validation dataset
+                val_loss, val_accuracy = evaluate(model, validation_loader)
+                writer.add_scalar("Loss-Val", val_loss, batch_idx)
+        
         # Save the model for each epoch
         torch.save(model.state_dict(), os.path.join(dir, f'epoch{epoch}.pt')) # Save only the model's parameters as a dictionary
     
@@ -131,13 +136,22 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
     return model
 
 if __name__ == '__main__':
-    dataset = Image_Dataset(use_cuda = False)
+    dataset = Image_Dataset()
     # print(type(dataset)) # 'image_dataset.Image_Dataset'
+    print("Images Loaded.")
     model = CNN()
-    model_name = 'CNN'
-    batch_size = 16
-    epoch = 1
+    model.to(device)
+    model_name = 'CNN' # 'Transfer_Resnet50' / 'CNN'
+    batch_size = 32
+    epoch = 10
+    lr = 0.01 #Learning rate
 
+    # Continue training with existing model?
+    continue_training = True
+    model_path = 'final_models/CustomCNN_10epochs.pt'
+    if continue_training:
+        model.load_state_dict(torch.load(model_path))
+    
     # Load datasets
     train_set, validation_set, test_set = split_train_test(dataset, fractions = [0.7, 0.15])
     # print(type(train_set)) # 'torch.utils.data.dataset.Subset'
@@ -146,6 +160,6 @@ if __name__ == '__main__':
     test_loader = torch.utils.data.DataLoader(test_set, batch_size = batch_size)
 
     # Train the model
-    model = train(model, train_loader, validation_loader, test_loader, model_name = model_name, lr = 0.1, epochs = epoch)
-
+    print("Start training...")
+    model = train(model, train_loader, validation_loader, test_loader, model_name = model_name, lr = lr, epochs = epoch)
 

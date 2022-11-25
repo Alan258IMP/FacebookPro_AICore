@@ -9,6 +9,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Image_Dataset(torch.utils.data.Dataset):
     '''
@@ -31,21 +32,19 @@ class Image_Dataset(torch.utils.data.Dataset):
                  product_file = 'raw_data/Products_cleaned.csv',
                  image_file = 'raw_data/Images.csv',
                  image_dir = 'raw_data/cleaned_images',
-                 transform = None,
-                 use_cuda = False):
+                 transform = None):
         super().__init__()
         self.image_dir = image_dir
-        self.cuda = use_cuda
         # Read data
         self.product_table = pd.read_csv(product_file, lineterminator = "\n")
         self.product_table['category'] = self.product_table['category'].str.split("/").str[0].str[:-1]  # Ignore sub-categories - intended?
         product_labels = self.product_table['category'].tolist() # labels for each product
         
         # Encoder & Decoder
-        # self.category_count = len(set(product_labels)) # 13 in total
-        # print("No of categories:", self.category_count)
-        self.encoder = {category_name: label_number for (label_number, category_name) in enumerate(set(product_labels))}
-        self.decoder = {label_number: category_name for (label_number, category_name) in enumerate(set(product_labels))}
+        categories = set(product_labels) # 13 in total
+        print(f"Loading images from {len(categories)} categories...")
+        self.encoder = {category_name: label_number for (label_number, category_name) in enumerate(categories)}
+        self.decoder = {label_number: category_name for (label_number, category_name) in enumerate(categories)}
 
         # Read images and match them to corresponding categories
         self.image_table = pd.read_csv(image_file, usecols = ['id', 'product_id'])
@@ -68,16 +67,13 @@ class Image_Dataset(torch.utils.data.Dataset):
         '''
         Returns the image as a torch.Tensor object, and its category (encoded to an integer).
         '''
-        # print(idx)
         image_path = os.path.join(self.image_dir, f"{self.image_table.iloc[idx, 0]}.jpg")
         image = Image.open(image_path)
         image = self.transform(image)
+        image.to(device)
 
         label = self.image_table['category'][idx] # Category this image is in
         label = self.encoder[label] # Encode to int
-
-        if self.cuda:
-            image = image.cuda() # Get our GPU working on training the model
         return image, label
 
     def match_images(self, save = False):
@@ -91,15 +87,14 @@ class Image_Dataset(torch.utils.data.Dataset):
 
 
 if __name__ == '__main__':
-    dataset = Image_Dataset(use_cuda = False)
+    dataset = Image_Dataset()
     dataloader = torch.utils.data.DataLoader(dataset, batch_size = 16, shuffle = True)
 
-    # For debugging purpose only: Print a sample image
+    # For debugging purpose only: Try to print a sample image
     images, labels = next(iter(dataloader))
     index = 1
     print(images[index])
     print(labels[index])
-    print(images[index].is_cuda)
     print(images[index].size())
     # Show it with matplotlib
     plt.imshow(images[index].cpu().permute(1,2,0))
