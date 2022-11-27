@@ -1,13 +1,15 @@
 # FacebookPro_AICore
-A python recreation of the system behind Facebook marketplace, which uses AI to recommend the most relevant listings based on a personalised search query.
+This project is a python recreation of the system behind Facebook marketplace, which uses AI to recommend the most relevant listings based on a personalised search query.
 
-This project requires [Pillow](https://github.com/python-pillow/Pillow), [Sklearn](https://github.com/scikit-learn/scikit-learn), [Pytorch](https://github.com/pytorch/pytorch.github.io), [Tensorboard](https://github.com/tensorflow/tensorboard) and [Fastapi](https://github.com/tiangolo/fastapi).
+This project requires [Pillow](https://github.com/python-pillow/Pillow), [Sklearn](https://github.com/scikit-learn/scikit-learn), [Pytorch](https://github.com/pytorch/pytorch.github.io), [Tensorboard](https://github.com/tensorflow/tensorboard) and [FastAPI](https://github.com/tiangolo/fastapi).
+
+Note that due to hardware limitations, the aim of this project is to practice Pytorch and API deployment rather than producing an accurate AI prediction model.
 
 ## Preliminary processing of the dataset
 
 I downloaded the text and image dataset in .csv and .jpg format respectively. Then I performed some preliminary cleaning of the dataset.
 
-To clean the tabular dataset I converted the prices of the products to np.float64 objects by removing the pound signs and the commas. To clean the image dataset, I made use of the Pillow library to resize all images to 128x128 size and standardized them to RGB mode.
+To clean the tabular dataset I converted the prices of the products to np.float64 objects by removing the pound signs and the commas. To clean the image dataset, I made use of the Pillow library to resize all images to 128x128(px) size and standardized them to RGB mode.
 
 ## Create a vision model
 
@@ -60,13 +62,14 @@ Unfortunately my custom CNN model failed to achieve an accuracy of more than 15%
 
 Alternatively, we can use transfer learning to fine-tune an existing image classification model [ResNet-50](https://pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html). We only need to replace the final layer so that the model returns 13 output features.
 
-The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. I used Tensorboard to visualize the loss functions for each run.
+The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. I used Tensorboard to visualize the loss functions for each run. Below are the loss functions for the training set and the validation set over 25 epochs.
 
-In progress...
+Images
 
+The final accuracy of the model is 48.7%. This is in the context of using 128x128 (px) sized images because of hardware limitations.
 
 ## Notes
 
-1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide. Once CUDA is installed try out `train_GPU.py`.
+1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
 
 2. A possible extension to the project is to create a text comprehension model and integrate it with the vision model in order to further improve the accuracy of the model.

@@ -68,7 +68,7 @@ def evaluate(model, dataloader):
     #return np.mean(losses), correct/example_count
     return float(sum(losses))/len(losses), correct/example_count # numpy does not work with cuda type tensor
 
-def train(model, train_loader, validation_loader, test_loader, model_name = None, optimizer = torch.optim.SGD, lr = 0.01, epochs = 10):
+def train(model, train_loader, validation_loader, test_loader, model_name = None, optimizer = torch.optim.SGD, lr = 0.01, epochs = 10, lr_scheduler = None):
     '''
     Train and evaluate a model for a certain number of epoch, and save the model for each epoch
     
@@ -93,16 +93,20 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
     '''
 
     writer = SummaryWriter()
-    optimizer = optimizer(model.parameters(), lr = lr)
+    if isinstance(optimizer, type):
+        optimizer = optimizer(model.parameters(), lr = lr)
     batch_idx = 0
     if not model_name:
         model_name = 'my_model'
+    if not lr_scheduler:
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 5, gamma = 0.5)
     
     # Make directory for the training session
     datetime_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     dir = f'model_evaluation/{model_name}_{datetime_now}'
     os.makedirs(dir)
 
+    print(f"Initial lr = {optimizer.param_groups[0]['lr']}")
     for epoch in range(epochs):
         for (features, labels) in train_loader: # Load the batch
             # Move to GPU
@@ -121,37 +125,38 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
             writer.add_scalar("Loss-Train", loss.item(), batch_idx)
             batch_idx += 1
 
-            if batch_idx % 150 == 0: # Draw a loss datapoint on tensorboard every 150 batches
-                # Evaluate the model on the validation dataset
+            # Evaluate the model on the validation dataset every 150 batches
+            if batch_idx % 150 == 0:
                 val_loss, val_accuracy = evaluate(model, validation_loader)
                 writer.add_scalar("Loss-Val", val_loss, batch_idx)
         
         # Save the model for each epoch
-        torch.save(model.state_dict(), os.path.join(dir, f'epoch{epoch}.pt')) # Save only the model's parameters as a dictionary
+        state = {'model_state_dict': model.state_dict(),
+                 'optimizer': optimizer.state_dict(),
+                 'loss': loss,}
+        torch.save(state, os.path.join(dir, f'epoch{epoch}.pt'))
+
+        # Update lr after each epoch
+        lr_scheduler.step()
+        print(f"Epoch {epoch} finished. Updated learning rate to {optimizer.param_groups[0]['lr']}")
     
     print("Model training complete - Evaluating on the test dataset")
     test_loss, test_accuracy = evaluate(model, test_loader)
     print(f"Test loss: {test_loss}, accuracy: {test_accuracy}")
-    # Need to write this on tensorboard?
     return model
 
 if __name__ == '__main__':
     dataset = Image_Dataset()
     # print(type(dataset)) # 'image_dataset.Image_Dataset'
     print("Images Loaded.")
-    model = CNN()
-    model.to(device)
-    model_name = 'CNN' # 'Transfer_Resnet50' / 'CNN'
+    model = Transfer_Resnet50()
+    model_name = 'Transfer_Resnet50' # 'Transfer_Resnet50' / 'CNN'
     batch_size = 32
-    epoch = 10
-    lr = 0.01 #Learning rate
+    epoch = 30
+    lr = 0.2 #Initial learning rate
+    lr_scheduler = None # If none, set to default custom scheduler
+    optimizer = torch.optim.SGD
 
-    # Continue training with existing model?
-    continue_training = True
-    model_path = 'final_models/CustomCNN_10epochs.pt'
-    if continue_training:
-        model.load_state_dict(torch.load(model_path))
-    
     # Load datasets
     train_set, validation_set, test_set = split_train_test(dataset, fractions = [0.7, 0.15])
     # print(type(train_set)) # 'torch.utils.data.dataset.Subset'
@@ -159,7 +164,17 @@ if __name__ == '__main__':
     validation_loader = torch.utils.data.DataLoader(validation_set, batch_size = batch_size)
     test_loader = torch.utils.data.DataLoader(test_set, batch_size = batch_size)
 
-    # Train the model
-    print("Start training...")
-    model = train(model, train_loader, validation_loader, test_loader, model_name = model_name, lr = lr, epochs = epoch)
+    # Continue training with existing model?
+    continue_training = False
+    model_path = 'final_models/TransferResnet50_24epochs.pt'
+    if continue_training:
+        state = torch.load(model_path)
+        model.load_state_dict(state['model_state_dict'])
+        optimizer = optimizer(model.parameters(), lr = lr)
+        optimizer.load_state_dict(state['optimizer'])
 
+    model.to(device)
+    print("Start training...")
+    model = train(model, train_loader, validation_loader, test_loader, model_name = model_name, optimizer = optimizer, lr = lr, epochs = epoch)
+
+    
