@@ -56,20 +56,24 @@ class CNN(torch.nn.Module):
         )
 ```
 
-Unfortunately my custom CNN model failed to achieve an accuracy of more than 15%, which is far from satisfactory given that blindly guessing for our dataset corresponds to an accuracy of 1/13 (7.7%). To improve the model, we need to do a more comprehensive hyperparameter search, which requires lots of time and computing power.
+Unfortunately my custom CNN model achieved an accuracy of only 13~15%, which is far from satisfactory given that blindly guessing corresponds to an accuracy of 1/13 (7.7%) for our dataset. To improve the model, we need to do a more comprehensive hyperparameter search, which requires lots of time and computing power.
 
 ### Transfer learning: Fine-tune ResNet-50 model
 
 Alternatively, we can use transfer learning to fine-tune an existing image classification model [ResNet-50](https://pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html). We only need to replace the final layer so that the model returns 13 output features.
 
-The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. I used Tensorboard to visualize the loss functions for each run. Below are the loss functions for the training set and the validation set over 25 epochs.
+The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. The optimizer used is SGD (stochastic gradient descent). I set the initial learning rate to be 0.08, which is halved every 3 epochs by the StepLR scheduler: `lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 3, gamma = 0.5)`.
 
-Images
+I used Tensorboard to visualize the loss functions for each run. Below are the loss functions for the training set and the validation set over 32 epochs.
 
-The final accuracy of the model is 48.7%. This is in the context of using 128x128 (px) sized images because of hardware limitations.
+![TransferResnet50_32epochs](diagrams/32.png)
+
+The final accuracy of the model is 48.6%. This is in the context of using 128x128(px) sized images because of hardware limitations. A possible extension to the project is to create a text comprehension model on the description of each product, and then integrate it with the vision model in order to further improve the accuracy.
+
+## Deploy the model serving API
+
+In progress...
 
 ## Notes
 
-1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
-
-2. A possible extension to the project is to create a text comprehension model and integrate it with the vision model in order to further improve the accuracy of the model.
+- If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.

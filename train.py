@@ -99,7 +99,7 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
     if not model_name:
         model_name = 'my_model'
     if not lr_scheduler:
-        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 5, gamma = 0.5)
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 3, gamma = 0.5)
     
     # Make directory for the training session
     datetime_now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -153,7 +153,7 @@ if __name__ == '__main__':
     model_name = 'Transfer_Resnet50' # 'Transfer_Resnet50' / 'CNN'
     batch_size = 32
     epoch = 30
-    lr = 0.2 #Initial learning rate
+    lr = 0.08 #Initial learning rate
     lr_scheduler = None # If none, set to default custom scheduler
     optimizer = torch.optim.SGD
 
