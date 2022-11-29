@@ -3,14 +3,11 @@
 
 import torch
 
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 class CNN(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.layers = torch.nn.Sequential(
-            torch.nn.Conv2d(3, 8, 5, stride = 2, padding = 1), # in, out, kernel size, padding;
-            # in has 3 because we have RGB - 3 features...?
+            torch.nn.Conv2d(3, 8, 5, stride = 2, padding = 1), # in, out, kernel size
             torch.nn.ReLU(),
             torch.nn.Conv2d(8, 16, 5, stride = 2),
             torch.nn.ReLU(),

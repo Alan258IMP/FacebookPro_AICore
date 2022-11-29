@@ -56,8 +56,6 @@ class Image_Dataset(torch.utils.data.Dataset):
                 T.RandomPerspective(distortion_scale=0.2, p=0.4),
                 T.RandomHorizontalFlip(p=0.7),
                 T.ToTensor(), #if use ToTensor, dtype = float
-                # T.Normalize(mean=[0.485, 0.456, 0.406],
-                                #  std=[0.229, 0.224, 0.225]) # Necessary?
             ])
 
     def __len__(self):
@@ -96,7 +94,7 @@ if __name__ == '__main__':
     print(images[index])
     print(labels[index])
     print(images[index].size())
-    # Show it with matplotlib
+    # Show it using matplotlib
     plt.imshow(images[index].cpu().permute(1,2,0))
     plt.title("Sample Image")
     plt.show()

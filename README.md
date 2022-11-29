@@ -62,13 +62,13 @@ Unfortunately my custom CNN model achieved an accuracy of only 13~15%, which is 
 
 Alternatively, we can use transfer learning to fine-tune an existing image classification model [ResNet-50](https://pytorch.org/vision/main/models/generated/torchvision.models.resnet50.html). We only need to replace the final layer so that the model returns 13 output features.
 
-The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. The optimizer used is SGD (stochastic gradient descent). I set the initial learning rate to be 0.08, which is halved every 3 epochs by the StepLR scheduler: `lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 3, gamma = 0.5)`.
+The model is then trained with our image dataset, where 70% of the images are used for training, 15% for validation and 15% for final testing. The optimizer used is SGD (stochastic gradient descent) and the loss function is calculated with `torch.nn.functional.cross_entropy`. I set the initial learning rate to be 0.08, which is halved every 3 epochs by the StepLR scheduler: `lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size = 3, gamma = 0.5)`.
 
 I used Tensorboard to visualize the loss functions for each run. Below are the loss functions for the training set and the validation set over 32 epochs.
 
 ![TransferResnet50_32epochs](diagrams/32.png)
 
-The final accuracy of the model is 48.6%. This is in the context of using 128x128(px) sized images because of hardware limitations. A possible extension to the project is to create a text comprehension model on the description of each product, and then integrate it with the vision model in order to further improve the accuracy.
+The final accuracy of the model is 48.5%. This is in the context of using 128x128(px) sized images because of hardware limitations. A possible extension to the project is to create a text comprehension model on the description of each product, and then integrate it with the vision model in order to further improve the accuracy.
 
 ## Deploy the model serving API
 
@@ -76,4 +76,6 @@ In progress...
 
 ## Notes
 
-- If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
+1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
+
+2. In `train.py`, you can also continue training the model from a checkpoint. Note that the `state_dict` of BOTH the model and the optimizer must be loaded.

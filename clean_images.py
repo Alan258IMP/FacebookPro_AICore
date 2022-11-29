@@ -45,7 +45,7 @@ def make_save_directory(dir: str):
 
 
 if __name__ == '__main__':
-    final_size = 256 # Need to tweak this number to balance between quality of training & speed
+    final_size = 128 # Need to tweak this number to balance between quality of training & speed
     path = "raw_data/images/"
     image_dirs = os.listdir(path)
     save_dir = 'raw_data/cleaned_images'

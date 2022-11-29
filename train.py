@@ -9,7 +9,6 @@ import torch.nn.functional as F
 import os
 import datetime
 
-# GPU is at least 20 times faster than CPU on my device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def split_train_test(dataset, fractions):
@@ -109,7 +108,7 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
     print(f"Initial lr = {optimizer.param_groups[0]['lr']}")
     for epoch in range(epochs):
         for (features, labels) in train_loader: # Load the batch
-            # Move to GPU
+            # Move tensors to GPU
             features = features.to(device)
             labels = labels.to(device)
 
@@ -147,19 +146,17 @@ def train(model, train_loader, validation_loader, test_loader, model_name = None
 
 if __name__ == '__main__':
     dataset = Image_Dataset()
-    # print(type(dataset)) # 'image_dataset.Image_Dataset'
     print("Images Loaded.")
     model = Transfer_Resnet50()
     model_name = 'Transfer_Resnet50' # 'Transfer_Resnet50' / 'CNN'
     batch_size = 32
     epoch = 30
     lr = 0.08 #Initial learning rate
-    lr_scheduler = None # If none, set to default custom scheduler
+    lr_scheduler = None # If None, set to default custom scheduler
     optimizer = torch.optim.SGD
 
     # Load datasets
     train_set, validation_set, test_set = split_train_test(dataset, fractions = [0.7, 0.15])
-    # print(type(train_set)) # 'torch.utils.data.dataset.Subset'
     train_loader = torch.utils.data.DataLoader(train_set, batch_size = batch_size, shuffle = True)
     validation_loader = torch.utils.data.DataLoader(validation_set, batch_size = batch_size)
     test_loader = torch.utils.data.DataLoader(test_set, batch_size = batch_size)
