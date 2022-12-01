@@ -72,7 +72,7 @@ The final accuracy of the model is 48.5%. This is in the context of using 128x12
 
 ## Deploy the model serving API
 
-I created an API serving our model with FastAPI. FastAPI automatically generates a doc page which can be accessed through `serverURL/docs` (for our case `http://127.0.0.1:8080/docs`), where all get and post methods are listed. In the `/predict/image` post method, I made use of FastAPI's `UploadFile` class so that users can upload an image from their local device. The method will return a prediction of the most likely category of the image, together with a dictionary containing the probabilities for each category.
+I created a created an API serving our model with FastAPI. FastAPI automatically generates a doc API serving our model with FastAPI. FastAPI automatically generates a doc page which can be accessed thage which can be accessed throuugh `seh `servverURL/docrURL/docs` (for our ca` (for our case `http://127e `http://127.00.0.1:8080/docs`), where all get and post methods are listed. In the `/predict/image` post method, I made use of FastAPI's `UploadFile` class so that users can upload an image from their local device. The method will return a prediction of the most likely category of the image, together with a dictionary containing the probabilities for each category0.1:8080/docs`), where all get and post methods are listed. In the `/predict/image` post method, I made use of FastAPI's `UploadFile` class so that users can upload an image from their local device. The method will return a prediction of the most likely category of the image, together with a dictionary containing the probabilities for each category.
 
 ![FastAPI_Example](diagrams/api_sample.jpg)
 
