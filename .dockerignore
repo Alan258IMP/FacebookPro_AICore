@@ -1,0 +1,12 @@
+__pycache__
+*.ipynb
+.vscode
+model_evaluation
+diagrams
+raw_data
+practicals
+runs
+discarded_data
+final_models
+README.md
+clean_tabular_data.py
