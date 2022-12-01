@@ -10,3 +10,5 @@ discarded_data
 final_models
 README.md
 clean_tabular_data.py
+clean_images.py
+train.py

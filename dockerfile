@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.10.4
 
 WORKDIR /app
 
@@ -8,8 +8,8 @@ RUN apt-get install \
     'libsm6'\
     'libxext6'  -y
 RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
-COPY requirements.txt .
 
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
 COPY . .
@@ -17,3 +17,5 @@ COPY . .
 EXPOSE 8080
 
 CMD ["python3", "api.py"]
+
+#CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8080"]

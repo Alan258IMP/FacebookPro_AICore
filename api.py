@@ -65,9 +65,15 @@ try:
 except:
     raise OSError("No Image processor found. Check that you have the encoder and the model in the correct location")
 
+class TextItem(BaseModel):
+    text: str
 
 app = FastAPI()
 print("Starting server")
+
+@app.get("/")
+async def root():
+    return {"message": "Started server process"}
 
 @app.get('/healthcheck')
 def healthcheck():
@@ -85,10 +91,10 @@ def predict_image(image: UploadFile = File(...)):
     predicted_class = model.predict(im_processed)
     all_probabilities = model.predict_categories(im_processed)
     response = {
-    "Category": predicted_class, # Return the category here
+    "Predicted Category": predicted_class, # Return the category here
     "Probabilities": all_probabilities # Return a list or dict of probabilities here
     }
     return JSONResponse(content=response)
 
 if __name__ == '__main__':
-    uvicorn.run("api:app", host="0.0.0.0", port=8080)
+    uvicorn.run("api:app", host="127.0.0.1", port=8080)

@@ -74,6 +74,8 @@ The final accuracy of the model is 48.5%. This is in the context of using 128x12
 
 In progress...
 
+`docker build -t facebook_image_classification .`
+
 ## Notes
 
 1. If you have a Nvidia GPU on your device, I highly recommend installing [CUDA](https://developer.nvidia.com/cuda-downloads) to get your GPU working on the training of the vision model and speed the learning process up. See [Pytorch website](https://pytorch.org/get-started/locally/) for a full guide.
