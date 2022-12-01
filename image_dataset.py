@@ -8,6 +8,7 @@ from torchvision.io import read_image
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import pickle
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -45,6 +46,9 @@ class Image_Dataset(torch.utils.data.Dataset):
         print(f"Loading images from {len(categories)} categories...")
         self.encoder = {category_name: label_number for (label_number, category_name) in enumerate(categories)}
         self.decoder = {label_number: category_name for (label_number, category_name) in enumerate(categories)}
+        # Save decoder as pkl file
+        with open('image_decoder.pkl', 'wb') as f: # 'wb': write a brand new file (overwrite existing file)
+            pickle.dump(self.decoder, f, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Read images and match them to corresponding categories
         self.image_table = pd.read_csv(image_file, usecols = ['id', 'product_id'])

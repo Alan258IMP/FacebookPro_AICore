@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
     # Continue training with existing model?
     continue_training = False
-    model_path = 'final_models/TransferResnet50_24epochs.pt'
+    model_path = 'TransferResnet50_32epochs.pt'
     if continue_training:
         state = torch.load(model_path)
         model.load_state_dict(state['model_state_dict'])
